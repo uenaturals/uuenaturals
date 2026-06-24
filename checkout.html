@@ -241,6 +241,17 @@
       color: var(--primary);
     }
 
+    .charge-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border);
+      font-size: 14px;
+      color: var(--muted);
+    }
+
     .actions {
       margin-top: 16px;
       display: grid;
@@ -410,7 +421,6 @@
             <label class="pay-option"><input type="radio" name="paymentMethod" value="Bank Transfer" required> Bank Transfer</label>
             <label class="pay-option"><input type="radio" name="paymentMethod" value="Credit/Debit Card" required> Credit/Debit Card</label>
             <label class="pay-option"><input type="radio" name="paymentMethod" value="EasyPaisa" required> EasyPaisa</label>
-            <label class="pay-option"><input type="radio" name="paymentMethod" value="Easypessa" required> Easypessa</label>
             <label class="pay-option"><input type="radio" name="paymentMethod" value="JazzCash" required> JazzCash</label>
           </div>
           <div id="onlinePaymentNote" class="online-payment-note" role="status" aria-live="polite">
@@ -434,6 +444,10 @@
             <span style="text-align:right;">Price</span>
           </div>
           <div id="summaryRows"></div>
+          <div class="charge-row">
+            <span>Delivery Charges</span>
+            <strong id="deliveryCharge">Rs. 0</strong>
+          </div>
           <div class="total">
             <span>Total Amount</span>
             <span id="grandTotal">Rs. 0</span>
@@ -463,6 +477,7 @@
   <script>
     const ORDERS_STORAGE_KEY = 'orders';
     const CUSTOMER_STORAGE_KEY = 'checkoutCustomer';
+    const DELIVERY_CHARGE = 200;
     const ORDER_API_URL = window.__UENATURALS_ORDER_API_URL__ || 'http://localhost:4000/api/orders';
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
@@ -493,17 +508,25 @@
     const form = document.getElementById('checkoutForm');
     const statusMsg = document.getElementById('statusMsg');
     const summaryRows = document.getElementById('summaryRows');
+    const deliveryCharge = document.getElementById('deliveryCharge');
     const grandTotal = document.getElementById('grandTotal');
     const onlinePaymentNote = document.getElementById('onlinePaymentNote');
     const confirmPaymentNote = document.getElementById('confirmPaymentNote');
 
-    function getCartTotal() {
+    function getCartSubtotal() {
       return cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
+    }
+
+    function getCartTotal() {
+      const subtotal = getCartSubtotal();
+      if (!subtotal) return 0;
+      return subtotal + DELIVERY_CHARGE;
     }
 
     function renderSummary() {
       if (!cart.length) {
         summaryRows.innerHTML = '<p style="color:#666; padding: 14px 0;">Your cart is empty. <a href="index.html">Go back to store</a>.</p>';
+        deliveryCharge.textContent = 'Rs. 0';
         grandTotal.textContent = 'Rs. 0';
         return;
       }
@@ -519,6 +542,8 @@
         `;
         summaryRows.appendChild(row);
       });
+
+      deliveryCharge.textContent = `Rs. ${DELIVERY_CHARGE.toLocaleString('en-PK')}`;
       grandTotal.textContent = `Rs. ${getCartTotal().toLocaleString('en-PK')}`;
     }
 
