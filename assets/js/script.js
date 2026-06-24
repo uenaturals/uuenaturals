@@ -230,6 +230,24 @@ function initCheckout() {
     renderCheckoutSummary();
 }
 
+function initProductButtons() {
+    const buttons = document.querySelectorAll('[data-product]');
+
+    buttons.forEach((button) => {
+        button.addEventListener('click', function() {
+            const productName = button.getAttribute('data-product') || 'UENATURALS Hair Oil';
+            const price = Number(button.getAttribute('data-price') || 0);
+
+            if (!price) {
+                showNotification('Product price is missing.', 'error');
+                return;
+            }
+
+            addToCart(productName, price);
+        });
+    });
+}
+
 function openCheckout() {
     if (!cart.length) {
         showNotification('Your cart is empty. Add products before checkout.', 'error');
