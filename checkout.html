@@ -303,6 +303,25 @@
 
     .confirm-row:last-child { border-bottom: 0; }
 
+    .confirm-note {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid #cfdfd1;
+      background: #f3faf4;
+      color: #2f5034;
+      font-size: 14px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .confirm-note strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 15px;
+      color: #214826;
+    }
+
     @media (max-width: 980px) {
       .layout { grid-template-columns: 1fr; }
     }
@@ -385,7 +404,7 @@
             For online wallet payment, transfer to:
             <strong>03160537315</strong>
             Account Title: <strong>Uswa Eman</strong>
-            <div class="online-payment-tip">Share the screenshot of your payment in DM to confirm your order.</div>
+            <div class="online-payment-tip">Please share the screenshot of your payment in DM to confirm your order.</div>
           </div>
 
           <div class="actions">
@@ -415,6 +434,10 @@
       <div class="ok"><i class="fas fa-check"></i></div>
       <h2 style="margin:0;">Order Confirmed</h2>
       <p id="confirmMsg" style="margin-top:8px;color:var(--muted);">Thank you for your order.</p>
+      <div id="confirmPaymentNote" class="confirm-note" aria-live="polite">
+        <strong>Your order is confirmed.</strong>
+        For online payment, please share the screenshot of your payment in DM to confirm your order.
+      </div>
       <div class="confirm-grid">
         <div class="confirm-row"><span>Order Number</span><strong id="cOrderNumber">-</strong></div>
         <div class="confirm-row"><span>Customer Name</span><strong id="cName">-</strong></div>
@@ -435,6 +458,7 @@
     const summaryRows = document.getElementById('summaryRows');
     const grandTotal = document.getElementById('grandTotal');
     const onlinePaymentNote = document.getElementById('onlinePaymentNote');
+    const confirmPaymentNote = document.getElementById('confirmPaymentNote');
 
     function getCartTotal() {
       return cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
@@ -520,6 +544,8 @@
       document.getElementById('cName').textContent = order.customer.fullName;
       document.getElementById('cTotal').textContent = `Rs. ${Number(order.total).toLocaleString('en-PK')}`;
       document.getElementById('confirmMsg').textContent = 'Your order has been placed successfully.';
+      const isOnlinePayment = order.paymentMethod && order.paymentMethod !== 'Cash on Delivery (COD)';
+      confirmPaymentNote.style.display = isOnlinePayment ? 'block' : 'none';
     }
 
     function restoreCustomer() {
