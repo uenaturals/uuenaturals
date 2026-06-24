@@ -188,6 +188,18 @@
       margin-top: 4px;
     }
 
+    .online-payment-tip {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #f0d2aa;
+      background: #fff4df;
+      color: #7f4f12;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
     .summary-head,
     .summary-row {
       display: grid;
@@ -373,6 +385,7 @@
             For online wallet payment, transfer to:
             <strong>03160537315</strong>
             Account Title: <strong>Uswa Eman</strong>
+            <div class="online-payment-tip">Share the screenshot of your payment in DM to confirm your order.</div>
           </div>
 
           <div class="actions">
@@ -526,7 +539,7 @@
     function updateOnlinePaymentNote() {
       const selectedPayment = form.querySelector('input[name="paymentMethod"]:checked');
       const value = selectedPayment ? selectedPayment.value : '';
-      const shouldShow = value === 'Easypessa' || value === 'EasyPaisa';
+      const shouldShow = value && value !== 'Cash on Delivery (COD)';
       onlinePaymentNote.classList.toggle('active', shouldShow);
     }
 
