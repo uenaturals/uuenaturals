@@ -468,6 +468,7 @@
 
     function getFixedPriceForProduct(productName) {
       const name = String(productName || '').toLowerCase();
+      if (name === 'velora') return 1850;
       if (name.includes('200ml')) return 1850;
       if (name.includes('120ml')) return 1650;
       return null;

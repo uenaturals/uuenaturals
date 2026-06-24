@@ -11,6 +11,7 @@ const ORDER_API_URL = window.__UENATURALS_ORDER_API_URL__ || 'http://localhost:4
 
 function getFixedPriceForProduct(productName) {
     const name = String(productName || '').toLowerCase();
+    if (name === 'velora') return 1850;
     if (name.includes('200ml')) return 1850;
     if (name.includes('120ml')) return 1650;
     return null;
@@ -851,11 +852,24 @@ function initProductButtons() {
     
     addToCartButtons.forEach(button => {
         button.addEventListener('click', function() {
-            // Get product name and price from the card
+            // Prefer explicit data attributes to avoid text parsing bugs (e.g., 200ml -> 200).
             const card = this.closest('.product-card');
-            const productName = card.querySelector('h3').textContent;
-            const priceText = card.querySelector('.price').textContent.replace('₹', '').replace(',', '');
-            const price = parseInt(priceText);
+            const productName = this.getAttribute('data-product') || (card ? card.querySelector('h3').textContent : 'Velora');
+
+            let price = Number(this.getAttribute('data-price') || 0);
+            if (!price && card) {
+                const priceNode = this.parentElement && this.parentElement.querySelector('.price');
+                const priceText = priceNode ? priceNode.textContent : '';
+                const pkrMatch = priceText.match(/PKR\s*([\d,]+)/i);
+                if (pkrMatch) {
+                    price = Number(pkrMatch[1].replace(/,/g, ''));
+                }
+            }
+
+            if (!price) {
+                showNotification('Product price is missing.', 'error');
+                return;
+            }
             
             // Add to cart
             addToCart(productName, price);
