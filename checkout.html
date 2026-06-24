@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout | uenaturals</title>
+  <title>Checkout | UENATURALS</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
@@ -168,6 +168,26 @@
 
     .pay-option input { margin: 0; }
 
+    .online-payment-note {
+      display: none;
+      margin-top: 12px;
+      border: 1px solid #cfdfd1;
+      background: #f3faf4;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 13px;
+      color: #2f5034;
+    }
+
+    .online-payment-note.active { display: block; }
+
+    .online-payment-note strong {
+      display: block;
+      font-size: 15px;
+      color: #214826;
+      margin-top: 4px;
+    }
+
     .summary-head,
     .summary-row {
       display: grid;
@@ -284,7 +304,7 @@
 <body>
   <div class="container">
     <div class="top">
-      <div class="brand"><i class="fas fa-leaf"></i> uenaturals</div>
+      <div class="brand"><i class="fas fa-leaf"></i> UENATURALS</div>
       <a class="btn btn-back" href="index.html"><i class="fas fa-arrow-left"></i> Back to Store</a>
     </div>
 
@@ -349,6 +369,11 @@
             <label class="pay-option"><input type="radio" name="paymentMethod" value="Easypessa" required> Easypessa</label>
             <label class="pay-option"><input type="radio" name="paymentMethod" value="JazzCash" required> JazzCash</label>
           </div>
+          <div id="onlinePaymentNote" class="online-payment-note" role="status" aria-live="polite">
+            For online wallet payment, transfer to:
+            <strong>03160537315</strong>
+            Account Title: <strong>Uswa Eman</strong>
+          </div>
 
           <div class="actions">
             <button class="btn btn-primary" id="placeOrderBtn" type="submit">Place Order</button>
@@ -396,6 +421,7 @@
     const statusMsg = document.getElementById('statusMsg');
     const summaryRows = document.getElementById('summaryRows');
     const grandTotal = document.getElementById('grandTotal');
+    const onlinePaymentNote = document.getElementById('onlinePaymentNote');
 
     function getCartTotal() {
       return cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
@@ -493,6 +519,15 @@
         const r = form.querySelector(`input[name="paymentMethod"][value="${saved.paymentMethod}"]`);
         if (r) r.checked = true;
       }
+
+      updateOnlinePaymentNote();
+    }
+
+    function updateOnlinePaymentNote() {
+      const selectedPayment = form.querySelector('input[name="paymentMethod"]:checked');
+      const value = selectedPayment ? selectedPayment.value : '';
+      const shouldShow = value === 'Easypessa' || value === 'EasyPaisa';
+      onlinePaymentNote.classList.toggle('active', shouldShow);
     }
 
     form.addEventListener('submit', async (e) => {
@@ -566,8 +601,15 @@
       showConfirmation(order);
     });
 
+    form.addEventListener('change', (e) => {
+      if (e.target && e.target.name === 'paymentMethod') {
+        updateOnlinePaymentNote();
+      }
+    });
+
     renderSummary();
     restoreCustomer();
+    updateOnlinePaymentNote();
   </script>
 </body>
 </html>
