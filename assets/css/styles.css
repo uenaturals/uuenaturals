@@ -1365,7 +1365,11 @@ a {
 .checkout-section,
 .confirmation-section {
     display: none;
-    min-height: calc(100vh - 90px);
+    position: fixed;
+    inset: 0;
+    z-index: 3200;
+    overflow-y: auto;
+    min-height: 100vh;
     padding: 90px 0;
     background:
         radial-gradient(circle at 10% 10%, rgba(139, 172, 143, 0.2), transparent 35%),
@@ -1675,7 +1679,7 @@ a {
 @media (max-width: 768px) {
     .checkout-section,
     .confirmation-section {
-        padding: 72px 0;
+        padding: 72px 0 32px;
     }
 
     .checkout-header h2 {
