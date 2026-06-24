@@ -466,6 +466,29 @@
     const ORDER_API_URL = window.__UENATURALS_ORDER_API_URL__ || 'http://localhost:4000/api/orders';
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
+    function getFixedPriceForProduct(productName) {
+      const name = String(productName || '').toLowerCase();
+      if (name.includes('200ml')) return 1850;
+      if (name.includes('120ml')) return 1650;
+      return null;
+    }
+
+    function normalizeCartPrices() {
+      let changed = false;
+      cart = cart.map((item) => {
+        const fixedPrice = getFixedPriceForProduct(item.name);
+        if (fixedPrice !== null && Number(item.price) !== fixedPrice) {
+          changed = true;
+          return { ...item, price: fixedPrice };
+        }
+        return item;
+      });
+
+      if (changed) {
+        localStorage.setItem('cart', JSON.stringify(cart));
+      }
+    }
+
     const form = document.getElementById('checkoutForm');
     const statusMsg = document.getElementById('statusMsg');
     const summaryRows = document.getElementById('summaryRows');
@@ -659,6 +682,7 @@
       }
     });
 
+    normalizeCartPrices();
     renderSummary();
     restoreCustomer();
     updateOnlinePaymentNote();

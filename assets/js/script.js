@@ -9,12 +9,37 @@ const ORDERS_STORAGE_KEY = 'orders';
 const CUSTOMER_STORAGE_KEY = 'checkoutCustomer';
 const ORDER_API_URL = window.__UENATURALS_ORDER_API_URL__ || 'http://localhost:4000/api/orders';
 
+function getFixedPriceForProduct(productName) {
+    const name = String(productName || '').toLowerCase();
+    if (name.includes('200ml')) return 1850;
+    if (name.includes('120ml')) return 1650;
+    return null;
+}
+
+function normalizeCartPrices() {
+    let changed = false;
+
+    cart = cart.map((item) => {
+        const fixedPrice = getFixedPriceForProduct(item.name);
+        if (fixedPrice !== null && Number(item.price) !== fixedPrice) {
+            changed = true;
+            return { ...item, price: fixedPrice };
+        }
+        return item;
+    });
+
+    if (changed) {
+        localStorage.setItem('cart', JSON.stringify(cart));
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeAll();
 });
 
 // Initialize all features
 function initializeAll() {
+    normalizeCartPrices();
     initFAQ();
     initTestimonials();
     initContactForm();
@@ -122,6 +147,7 @@ function addToCart(productName, price) {
     const existingItem = cart.find(item => item.name === productName);
     
     if (existingItem) {
+        existingItem.price = price;
         existingItem.quantity++;
     } else {
         cart.push({
