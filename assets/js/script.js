@@ -220,7 +220,7 @@ function initCheckout() {
         checkoutBtn.addEventListener('click', function(event) {
             // Always route to dedicated checkout page for reliable behavior.
             event.preventDefault();
-            window.location.href = 'checkout.html';
+            window.location.href = 'checkout.html?v=20260624-3';
         });
     }
 
