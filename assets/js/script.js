@@ -98,7 +98,7 @@ function renderCartItems() {
         cartItemEl.innerHTML = `
             <div class="cart-item-info">
                 <div class="cart-item-name">${item.name}</div>
-                <div class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</div>
+                <div class="cart-item-price">PKR ${item.price.toLocaleString('en-IN')}</div>
             </div>
             <div class="cart-item-actions">
                 <div class="qty-control">
@@ -113,7 +113,7 @@ function renderCartItems() {
     });
     
     // Update total
-    document.getElementById('cartTotal').textContent = '₹' + total.toLocaleString('en-IN');
+    document.getElementById('cartTotal').textContent = 'PKR ' + total.toLocaleString('en-IN');
     cartFooter.style.display = 'block';
 }
 
@@ -445,7 +445,7 @@ function renderCheckoutSummary() {
 
     if (!cart.length) {
         summaryItems.innerHTML = '<p class="checkout-empty">Your cart is empty.</p>';
-        grandTotal.textContent = '₹0';
+        grandTotal.textContent = 'PKR 0';
         return;
     }
 
@@ -456,12 +456,12 @@ function renderCheckoutSummary() {
         lineItem.innerHTML = `
             <span class="line-product">${item.name}</span>
             <span class="line-qty">${item.quantity}</span>
-            <span class="line-price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
+            <span class="line-price">PKR ${(item.price * item.quantity).toLocaleString('en-IN')}</span>
         `;
         summaryItems.appendChild(lineItem);
     });
 
-    grandTotal.textContent = `₹${getCartTotal().toLocaleString('en-IN')}`;
+    grandTotal.textContent = `PKR ${getCartTotal().toLocaleString('en-IN')}`;
 }
 
 function getCartTotal() {
