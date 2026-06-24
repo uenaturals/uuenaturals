@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | uenaturals</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #556b57;
+      --secondary: #8bac8f;
+      --cream: #fff8f0;
+      --beige: #f5e6d3;
+      --text: #3d3d3d;
+      --muted: #666;
+      --border: #e8d5c4;
+      --danger: #c94d4d;
+      --ok: #4c8253;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 8%, rgba(139,172,143,.2), transparent 35%),
+        radial-gradient(circle at 90% 15%, rgba(201,184,146,.22), transparent 32%),
+        linear-gradient(160deg, #fff8f2 0%, #f6eee2 100%);
+    }
+
+    .container {
+      width: min(1180px, 92vw);
+      margin: 0 auto;
+      padding: 24px 0 36px;
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 24px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-back {
+      border: 1px solid var(--border);
+      color: var(--primary);
+      background: #fff;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .page-title {
+      margin: 8px 0 22px;
+    }
+
+    .page-title h1 {
+      margin: 0;
+      color: var(--primary);
+      font-size: clamp(1.8rem, 4vw, 2.7rem);
+    }
+
+    .page-title p {
+      margin: 8px 0 0;
+      color: var(--muted);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .card {
+      background: rgba(255,255,255,.94);
+      border: 1px solid rgba(201,184,146,.45);
+      border-radius: 16px;
+      box-shadow: 0 12px 36px rgba(61,61,61,.1);
+      padding: 20px;
+    }
+
+    .card h2 {
+      margin: 0 0 14px;
+      color: var(--primary);
+      font-size: 1.3rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    input {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 12px;
+      font-size: 14px;
+      background: #fffdf9;
+    }
+
+    input:focus {
+      outline: 2px solid rgba(139,172,143,.35);
+      border-color: var(--secondary);
+    }
+
+    .payment {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .pay-option {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      background: #fffdf9;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .pay-option input { margin: 0; }
+
+    .summary-head,
+    .summary-row {
+      display: grid;
+      grid-template-columns: 1.5fr .5fr .9fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .summary-head {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .summary-row {
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--border);
+      font-size: 14px;
+    }
+
+    .summary-row .price {
+      text-align: right;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .total {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 12px;
+      margin-top: 8px;
+      border-top: 2px solid var(--border);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .actions {
+      margin-top: 16px;
+      display: grid;
+    }
+
+    .notice {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .status {
+      margin: 12px 0 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .status.error { color: var(--danger); }
+    .status.success { color: var(--ok); }
+
+    .confirm {
+      display: none;
+      max-width: 660px;
+      margin: 34px auto 0;
+      text-align: center;
+    }
+
+    .confirm.active { display: block; }
+
+    .confirm .ok {
+      width: 78px;
+      height: 78px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7aad81, #4b7e52);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      font-size: 34px;
+    }
+
+    .confirm-grid {
+      text-align: left;
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fffdf9;
+    }
+
+    .confirm-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #efe5d8;
+      font-size: 14px;
+    }
+
+    .confirm-row:last-child { border-bottom: 0; }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .grid, .payment { grid-template-columns: 1fr; }
+      .container { width: min(680px, 94vw); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top">
+      <div class="brand"><i class="fas fa-leaf"></i> uenaturals</div>
+      <a class="btn btn-back" href="index.html"><i class="fas fa-arrow-left"></i> Back to Store</a>
+    </div>
+
+    <div id="checkoutView">
+      <div class="page-title">
+        <h1>Secure Checkout</h1>
+        <p>Customer Details -> Address -> Payment -> Place Order</p>
+      </div>
+
+      <div class="layout">
+        <form id="checkoutForm" class="card" novalidate>
+          <h2>Customer Information</h2>
+          <div class="grid">
+            <div class="field full">
+              <label for="fullName">Full Name *</label>
+              <input id="fullName" name="fullName" type="text" required>
+            </div>
+            <div class="field">
+              <label for="emailAddress">Email Address *</label>
+              <input id="emailAddress" name="emailAddress" type="email" required>
+            </div>
+            <div class="field">
+              <label for="phoneNumber">Phone Number *</label>
+              <input id="phoneNumber" name="phoneNumber" type="tel" required>
+            </div>
+          </div>
+
+          <h2 style="margin-top:18px;">Shipping Address</h2>
+          <div class="grid">
+            <div class="field">
+              <label for="houseNumber">House/Apartment Number *</label>
+              <input id="houseNumber" name="houseNumber" type="text" required>
+            </div>
+            <div class="field">
+              <label for="streetAddress">Street Address *</label>
+              <input id="streetAddress" name="streetAddress" type="text" required>
+            </div>
+            <div class="field">
+              <label for="city">City *</label>
+              <input id="city" name="city" type="text" required>
+            </div>
+            <div class="field">
+              <label for="stateProvince">State/Province *</label>
+              <input id="stateProvince" name="stateProvince" type="text" required>
+            </div>
+            <div class="field">
+              <label for="postalCode">Postal Code *</label>
+              <input id="postalCode" name="postalCode" type="text" required>
+            </div>
+            <div class="field">
+              <label for="country">Country *</label>
+              <input id="country" name="country" type="text" required>
+            </div>
+          </div>
+
+          <h2 style="margin-top:18px;">Payment Method *</h2>
+          <div class="payment" id="paymentWrap">
+            <label class="pay-option"><input type="radio" name="paymentMethod" value="Cash on Delivery (COD)" required> Cash on Delivery (COD)</label>
+            <label class="pay-option"><input type="radio" name="paymentMethod" value="Bank Transfer" required> Bank Transfer</label>
+            <label class="pay-option"><input type="radio" name="paymentMethod" value="Credit/Debit Card" required> Credit/Debit Card</label>
+            <label class="pay-option"><input type="radio" name="paymentMethod" value="EasyPaisa" required> EasyPaisa</label>
+            <label class="pay-option"><input type="radio" name="paymentMethod" value="Easypessa" required> Easypessa</label>
+            <label class="pay-option"><input type="radio" name="paymentMethod" value="JazzCash" required> JazzCash</label>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-primary" id="placeOrderBtn" type="submit">Place Order</button>
+          </div>
+          <div id="statusMsg" class="status"></div>
+        </form>
+
+        <aside class="card">
+          <h2>Order Summary</h2>
+          <div class="summary-head">
+            <span>Product</span>
+            <span>Qty</span>
+            <span style="text-align:right;">Price</span>
+          </div>
+          <div id="summaryRows"></div>
+          <div class="total">
+            <span>Total Amount</span>
+            <span id="grandTotal">Rs. 0</span>
+          </div>
+          <p class="notice">Orders are saved to API when available, with local backup.</p>
+        </aside>
+      </div>
+    </div>
+
+    <section id="confirmView" class="card confirm">
+      <div class="ok"><i class="fas fa-check"></i></div>
+      <h2 style="margin:0;">Order Confirmed</h2>
+      <p id="confirmMsg" style="margin-top:8px;color:var(--muted);">Thank you for your order.</p>
+      <div class="confirm-grid">
+        <div class="confirm-row"><span>Order Number</span><strong id="cOrderNumber">-</strong></div>
+        <div class="confirm-row"><span>Customer Name</span><strong id="cName">-</strong></div>
+        <div class="confirm-row"><span>Order Total</span><strong id="cTotal">Rs. 0</strong></div>
+      </div>
+      <a href="index.html" class="btn btn-primary" style="margin-top:16px;">Continue Shopping</a>
+    </section>
+  </div>
+
+  <script>
+    const ORDERS_STORAGE_KEY = 'orders';
+    const CUSTOMER_STORAGE_KEY = 'checkoutCustomer';
+    const ORDER_API_URL = window.__UENATURALS_ORDER_API_URL__ || 'http://localhost:4000/api/orders';
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+    const form = document.getElementById('checkoutForm');
+    const statusMsg = document.getElementById('statusMsg');
+    const summaryRows = document.getElementById('summaryRows');
+    const grandTotal = document.getElementById('grandTotal');
+
+    function getCartTotal() {
+      return cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
+    }
+
+    function renderSummary() {
+      if (!cart.length) {
+        summaryRows.innerHTML = '<p style="color:#666; padding: 14px 0;">Your cart is empty. <a href="index.html">Go back to store</a>.</p>';
+        grandTotal.textContent = 'Rs. 0';
+        return;
+      }
+
+      summaryRows.innerHTML = '';
+      cart.forEach((item) => {
+        const row = document.createElement('div');
+        row.className = 'summary-row';
+        row.innerHTML = `
+          <span>${item.name}</span>
+          <span>${item.quantity}</span>
+          <span class="price">Rs. ${(item.price * item.quantity).toLocaleString('en-PK')}</span>
+        `;
+        summaryRows.appendChild(row);
+      });
+      grandTotal.textContent = `Rs. ${getCartTotal().toLocaleString('en-PK')}`;
+    }
+
+    function setStatus(msg, ok) {
+      statusMsg.textContent = msg || '';
+      statusMsg.className = `status ${ok ? 'success' : 'error'}`;
+    }
+
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function validate(data) {
+      const required = [
+        ['fullName', 'Full Name is required.'],
+        ['emailAddress', 'Email Address is required.'],
+        ['phoneNumber', 'Phone Number is required.'],
+        ['houseNumber', 'House/Apartment Number is required.'],
+        ['streetAddress', 'Street Address is required.'],
+        ['city', 'City is required.'],
+        ['stateProvince', 'State/Province is required.'],
+        ['postalCode', 'Postal Code is required.'],
+        ['country', 'Country is required.']
+      ];
+      for (const [k, m] of required) {
+        if (!data[k]) return { ok: false, msg: m, field: k };
+      }
+      if (!isValidEmail(data.emailAddress)) return { ok: false, msg: 'Please enter a valid Email Address.', field: 'emailAddress' };
+      if (!/^\d{7,15}$/.test(data.phoneNumber.replace(/[\s\-()+]/g, ''))) return { ok: false, msg: 'Please enter a valid Phone Number.', field: 'phoneNumber' };
+      if (!data.paymentMethod) return { ok: false, msg: 'Please select a Payment Method.' };
+      return { ok: true };
+    }
+
+    async function saveOrderToApi(order) {
+      try {
+        const res = await fetch(ORDER_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(order)
+        });
+        if (!res.ok) throw new Error('API failed');
+        const payload = await res.json().catch(() => null);
+        return { success: true, data: payload };
+      } catch {
+        return { success: false };
+      }
+    }
+
+    function persistLocalOrder(order) {
+      const all = JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY) || '[]');
+      all.push(order);
+      localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(all));
+    }
+
+    function showConfirmation(order) {
+      document.getElementById('checkoutView').style.display = 'none';
+      const view = document.getElementById('confirmView');
+      view.classList.add('active');
+      document.getElementById('cOrderNumber').textContent = order.orderNumber;
+      document.getElementById('cName').textContent = order.customer.fullName;
+      document.getElementById('cTotal').textContent = `Rs. ${Number(order.total).toLocaleString('en-PK')}`;
+      document.getElementById('confirmMsg').textContent = 'Your order has been placed successfully.';
+    }
+
+    function restoreCustomer() {
+      const saved = JSON.parse(localStorage.getItem(CUSTOMER_STORAGE_KEY) || 'null');
+      if (!saved) return;
+      Object.keys(saved).forEach((k) => {
+        if (form[k] && k !== 'paymentMethod') form[k].value = saved[k] || '';
+      });
+      if (saved.paymentMethod) {
+        const r = form.querySelector(`input[name="paymentMethod"][value="${saved.paymentMethod}"]`);
+        if (r) r.checked = true;
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setStatus('');
+
+      if (!cart.length) {
+        setStatus('Your cart is empty. Please add products first.', false);
+        return;
+      }
+
+      const selectedPayment = form.querySelector('input[name="paymentMethod"]:checked');
+      const data = {
+        fullName: form.fullName.value.trim(),
+        emailAddress: form.emailAddress.value.trim(),
+        phoneNumber: form.phoneNumber.value.trim(),
+        houseNumber: form.houseNumber.value.trim(),
+        streetAddress: form.streetAddress.value.trim(),
+        city: form.city.value.trim(),
+        stateProvince: form.stateProvince.value.trim(),
+        postalCode: form.postalCode.value.trim(),
+        country: form.country.value.trim(),
+        paymentMethod: selectedPayment ? selectedPayment.value : ''
+      };
+
+      const check = validate(data);
+      if (!check.ok) {
+        setStatus(check.msg, false);
+        if (check.field && form[check.field]) form[check.field].focus();
+        return;
+      }
+
+      const btn = document.getElementById('placeOrderBtn');
+      btn.disabled = true;
+      btn.textContent = 'Placing Order...';
+
+      const order = {
+        orderNumber: `UE${Date.now().toString().slice(-8)}`,
+        createdAt: new Date().toISOString(),
+        customer: {
+          fullName: data.fullName,
+          emailAddress: data.emailAddress,
+          phoneNumber: data.phoneNumber
+        },
+        shippingAddress: {
+          houseNumber: data.houseNumber,
+          streetAddress: data.streetAddress,
+          city: data.city,
+          stateProvince: data.stateProvince,
+          postalCode: data.postalCode,
+          country: data.country
+        },
+        paymentMethod: data.paymentMethod,
+        items: cart.map((i) => ({ ...i })),
+        total: getCartTotal()
+      };
+
+      const api = await saveOrderToApi(order);
+      if (api.success && api.data && api.data.orderNumber) {
+        order.orderNumber = api.data.orderNumber;
+      }
+
+      persistLocalOrder(order);
+      localStorage.setItem(CUSTOMER_STORAGE_KEY, JSON.stringify(data));
+      localStorage.setItem('cart', JSON.stringify([]));
+      cart = [];
+
+      btn.disabled = false;
+      btn.textContent = 'Place Order';
+
+      showConfirmation(order);
+    });
+
+    renderSummary();
+    restoreCustomer();
+  </script>
+</body>
+</html>
