@@ -95,9 +95,38 @@ organic-hair-oil-store/
 
 ## 🚀 Getting Started
 
-1. **Open the Website**: Simply open `index.html` in any modern web browser
-2. **No Installation Required**: This is a static website with no backend dependencies
-3. **Customize**: Edit HTML, CSS, and JavaScript files as needed
+1. **Install Dependencies**:
+   - Run `npm install`
+2. **Start the Order API**:
+   - Run `npm start`
+   - API will run on `http://localhost:4000`
+3. **Open the Website**:
+   - Open `index.html` in any modern web browser
+4. **Place a Test Order**:
+   - Add products to cart, proceed to checkout, submit order
+   - Frontend posts to `http://localhost:4000/api/orders`
+
+## 🛒 Checkout + Order API
+
+- Checkout form collects customer, shipping address, and payment method.
+- Payment options include COD, Bank Transfer, Credit/Debit Card, EasyPaisa, Easypessa, and JazzCash.
+- Orders are submitted to `POST /api/orders`.
+- Orders are stored in `data/orders.json`.
+- Customer snapshots are stored in `data/customers.json`.
+- If API is unavailable, the website still stores the order locally in browser storage as backup.
+
+### API Endpoints
+
+- `GET /api/health` - health check
+- `POST /api/orders` - save a new order
+- `GET /api/orders` - list all saved orders (admin)
+- `GET /api/orders/:orderNumber` - fetch a saved order
+
+### Admin Orders Page
+
+- Open `admin.html` to view all orders.
+- It reads from `GET /api/orders`.
+- Includes search and refresh controls.
 
 ## 🎨 Customization Guide
 

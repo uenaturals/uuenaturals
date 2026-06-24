@@ -673,6 +673,7 @@
                         <li><a href="#shop">Shop</a></li>
                         <li><a href="#contact">Contact</a></li>
                         <li><a href="#faq">FAQ</a></li>
+                        <li><a href="admin.html">Admin Orders</a></li>
                     </ul>
                 </div>
 
@@ -702,6 +703,146 @@
         </div>
     </footer>
 
+    <!-- Checkout Page -->
+    <section class="checkout-section" id="checkoutSection" aria-live="polite">
+        <div class="container">
+            <div class="checkout-header">
+                <button class="checkout-back" id="backToCartBtn" type="button">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Cart
+                </button>
+                <h2>Secure Checkout</h2>
+                <p>Complete your order with delivery and payment details</p>
+            </div>
+
+            <div class="checkout-layout">
+                <form id="checkoutForm" class="checkout-form" novalidate>
+                    <div class="checkout-card">
+                        <h3>Customer Information</h3>
+                        <div class="checkout-grid two-col">
+                            <div class="checkout-field full-width">
+                                <label for="fullName">Full Name *</label>
+                                <input id="fullName" name="fullName" type="text" required autocomplete="name" placeholder="Enter your full name">
+                            </div>
+                            <div class="checkout-field">
+                                <label for="emailAddress">Email Address *</label>
+                                <input id="emailAddress" name="emailAddress" type="email" required autocomplete="email" placeholder="you@example.com">
+                            </div>
+                            <div class="checkout-field">
+                                <label for="phoneNumber">Phone Number *</label>
+                                <input id="phoneNumber" name="phoneNumber" type="tel" required autocomplete="tel" placeholder="+92 300 1234567">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="checkout-card">
+                        <h3>Shipping Address</h3>
+                        <div class="checkout-grid two-col">
+                            <div class="checkout-field">
+                                <label for="houseNumber">House/Apartment Number *</label>
+                                <input id="houseNumber" name="houseNumber" type="text" required autocomplete="address-line1" placeholder="Apt 4B / House 12">
+                            </div>
+                            <div class="checkout-field">
+                                <label for="streetAddress">Street Address *</label>
+                                <input id="streetAddress" name="streetAddress" type="text" required autocomplete="address-line2" placeholder="Street and area">
+                            </div>
+                            <div class="checkout-field">
+                                <label for="city">City *</label>
+                                <input id="city" name="city" type="text" required autocomplete="address-level2" placeholder="City">
+                            </div>
+                            <div class="checkout-field">
+                                <label for="stateProvince">State/Province *</label>
+                                <input id="stateProvince" name="stateProvince" type="text" required autocomplete="address-level1" placeholder="State or province">
+                            </div>
+                            <div class="checkout-field">
+                                <label for="postalCode">Postal Code *</label>
+                                <input id="postalCode" name="postalCode" type="text" required autocomplete="postal-code" placeholder="Postal code">
+                            </div>
+                            <div class="checkout-field">
+                                <label for="country">Country *</label>
+                                <input id="country" name="country" type="text" required autocomplete="country-name" placeholder="Country">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="checkout-card">
+                        <h3>Payment Method *</h3>
+                        <div class="payment-options" id="paymentOptions">
+                            <label class="payment-option">
+                                <input type="radio" name="paymentMethod" value="Cash on Delivery (COD)" required>
+                                <span>Cash on Delivery (COD)</span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="paymentMethod" value="Bank Transfer" required>
+                                <span>Bank Transfer</span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="paymentMethod" value="Credit/Debit Card" required>
+                                <span>Credit/Debit Card</span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="paymentMethod" value="EasyPaisa" required>
+                                <span>EasyPaisa</span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="paymentMethod" value="Easypessa" required>
+                                <span>Easypessa</span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="paymentMethod" value="JazzCash" required>
+                                <span>JazzCash</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary place-order-btn" id="placeOrderBtn" type="submit">Place Order</button>
+                </form>
+
+                <aside class="checkout-card order-summary" aria-label="Order summary">
+                    <h3>Order Summary</h3>
+                    <div class="order-summary-head">
+                        <span>Product</span>
+                        <span>Qty</span>
+                        <span>Price</span>
+                    </div>
+                    <div class="order-summary-items" id="checkoutSummaryItems"></div>
+                    <div class="order-summary-total">
+                        <span>Total Amount</span>
+                        <strong id="checkoutGrandTotal">₹0</strong>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Confirmation Page -->
+    <section class="confirmation-section" id="confirmationSection" aria-live="polite">
+        <div class="container">
+            <div class="confirmation-card">
+                <div class="confirmation-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Order Confirmed</h2>
+                <p class="confirmation-message" id="confirmationMessage">Thank you for your purchase. Your order has been received successfully.</p>
+                <div class="confirmation-details">
+                    <div class="confirmation-row">
+                        <span>Order Number</span>
+                        <strong id="confirmOrderNumber">-</strong>
+                    </div>
+                    <div class="confirmation-row">
+                        <span>Customer Name</span>
+                        <strong id="confirmCustomerName">-</strong>
+                    </div>
+                    <div class="confirmation-row">
+                        <span>Order Total</span>
+                        <strong id="confirmOrderTotal">₹0</strong>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary" id="continueShoppingBtn">Continue Shopping</button>
+            </div>
+        </div>
+    </section>
+
     <!-- Cart Modal -->
     <div class="cart-modal" id="cartModal">
         <div class="cart-content">
@@ -719,7 +860,7 @@
                     <span>Total:</span>
                     <span id="cartTotal">₹0</span>
                 </div>
-                <button class="btn btn-primary" id="checkoutBtn">Proceed to Checkout</button>
+                <button class="btn btn-primary" id="checkoutBtn" onclick="openCheckout()">Proceed to Checkout</button>
             </div>
         </div>
     </div>

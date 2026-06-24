@@ -5,6 +5,9 @@
 
 // Cart data stored in localStorage
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
+const ORDERS_STORAGE_KEY = 'orders';
+const CUSTOMER_STORAGE_KEY = 'checkoutCustomer';
+const ORDER_API_URL = window.__UENATURALS_ORDER_API_URL__ || 'http://localhost:4000/api/orders';
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeAll();
@@ -19,6 +22,7 @@ function initializeAll() {
     initSmoothScroll();
     initProductButtons();
     initCart();
+    initCheckout();
     updateCartBadge();
     observeElements();
 }
@@ -54,6 +58,8 @@ function initCart() {
     overlay.addEventListener('click', closeCart);
     
     function openCart() {
+        cartModal.style.display = '';
+        overlay.style.display = '';
         cartModal.classList.add('active');
         overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -128,6 +134,7 @@ function addToCart(productName, price) {
     // Save to localStorage
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartBadge();
+    renderCheckoutSummary();
     showNotification(`${productName} added to cart!`, 'success');
 }
 
@@ -137,6 +144,7 @@ function removeFromCart(index) {
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartBadge();
     renderCartItems();
+    renderCheckoutSummary();
     showNotification(`${item.name} removed from cart`, 'success');
 }
 
@@ -145,6 +153,7 @@ function increaseQty(index) {
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartBadge();
     renderCartItems();
+    renderCheckoutSummary();
 }
 
 function decreaseQty(index) {
@@ -153,6 +162,7 @@ function decreaseQty(index) {
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartBadge();
         renderCartItems();
+        renderCheckoutSummary();
     }
 }
 
@@ -168,6 +178,379 @@ window.addToCart = addToCart;
 window.removeFromCart = removeFromCart;
 window.increaseQty = increaseQty;
 window.decreaseQty = decreaseQty;
+
+// ============================================
+// CHECKOUT FLOW
+// ============================================
+
+function initCheckout() {
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    const backToCartBtn = document.getElementById('backToCartBtn');
+    const checkoutForm = document.getElementById('checkoutForm');
+    const continueShoppingBtn = document.getElementById('continueShoppingBtn');
+
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', openCheckout);
+    }
+
+    // Fallback delegation ensures checkout still opens if the button is re-rendered.
+    document.addEventListener('click', function(event) {
+        const checkoutTrigger = event.target.closest('#checkoutBtn');
+        if (checkoutTrigger) {
+            openCheckout();
+        }
+    });
+
+    if (backToCartBtn) {
+        backToCartBtn.addEventListener('click', function() {
+            setCheckoutVisibility(false);
+            if (window.openCart) {
+                window.openCart();
+            }
+        });
+    }
+
+    if (continueShoppingBtn) {
+        continueShoppingBtn.addEventListener('click', function() {
+            setConfirmationVisibility(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showNotification('You can continue shopping now.', 'success');
+        });
+    }
+
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', handleCheckoutSubmit);
+    }
+
+    restoreSavedCustomerDetails();
+    renderCheckoutSummary();
+}
+
+function openCheckout() {
+    if (!cart.length) {
+        showNotification('Your cart is empty. Add products before checkout.', 'error');
+        return;
+    }
+
+    // Force close cart modal/overlay in case stale event bindings keep it open.
+    const cartModal = document.getElementById('cartModal');
+    const cartOverlay = document.querySelector('.cart-overlay');
+    if (cartModal) {
+        cartModal.classList.remove('active');
+    }
+    if (cartOverlay) {
+        cartOverlay.classList.remove('active');
+    }
+    document.body.style.overflow = 'auto';
+
+    if (window.closeCart) {
+        window.closeCart();
+    }
+
+    setConfirmationVisibility(false);
+    renderCheckoutSummary();
+    setCheckoutVisibility(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.openCheckout = openCheckout;
+
+async function handleCheckoutSubmit(e) {
+    e.preventDefault();
+
+    if (!cart.length) {
+        showNotification('Your cart is empty. Add products before placing an order.', 'error');
+        return;
+    }
+
+    const checkoutForm = e.currentTarget;
+    const orderData = collectCheckoutData(checkoutForm);
+    const validation = validateCheckoutData(orderData);
+    const submitBtn = document.getElementById('placeOrderBtn');
+
+    if (!validation.valid) {
+        showNotification(validation.message, 'error');
+        if (validation.focusFieldId) {
+            const field = document.getElementById(validation.focusFieldId);
+            if (field) {
+                field.focus();
+            }
+        }
+        return;
+    }
+
+    const orderNumber = `UE${Date.now().toString().slice(-8)}`;
+    const orderTotal = getCartTotal();
+    const order = {
+        orderNumber,
+        createdAt: new Date().toISOString(),
+        customer: {
+            fullName: orderData.fullName,
+            emailAddress: orderData.emailAddress,
+            phoneNumber: orderData.phoneNumber
+        },
+        shippingAddress: {
+            houseNumber: orderData.houseNumber,
+            streetAddress: orderData.streetAddress,
+            city: orderData.city,
+            stateProvince: orderData.stateProvince,
+            postalCode: orderData.postalCode,
+            country: orderData.country
+        },
+        paymentMethod: orderData.paymentMethod,
+        items: cart.map(item => ({ ...item })),
+        total: orderTotal
+    };
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Placing Order...';
+    }
+
+    const apiResult = await saveOrderToApi(order);
+    if (apiResult.success && apiResult.data && apiResult.data.orderNumber) {
+        order.orderNumber = apiResult.data.orderNumber;
+    }
+
+    // Keep local backup even when API succeeds for resilience.
+    persistOrder(order);
+    localStorage.setItem(CUSTOMER_STORAGE_KEY, JSON.stringify(orderData));
+
+    cart = [];
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartBadge();
+    renderCartItems();
+    renderCheckoutSummary();
+
+    showConfirmation(order);
+    setCheckoutVisibility(false);
+    setConfirmationVisibility(true);
+    checkoutForm.reset();
+    restoreSavedCustomerDetails();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Place Order';
+    }
+
+    if (!apiResult.success) {
+        showNotification('Order placed and saved locally. API server is currently unavailable.', 'error');
+    }
+}
+
+async function saveOrderToApi(order) {
+    try {
+        const response = await fetch(ORDER_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(order)
+        });
+
+        if (!response.ok) {
+            throw new Error(`API request failed with status ${response.status}`);
+        }
+
+        const payload = await response.json().catch(() => null);
+        return { success: true, data: payload };
+    } catch (error) {
+        console.warn('Order API unavailable:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+function collectCheckoutData(form) {
+    const paymentMethodInput = form.querySelector('input[name="paymentMethod"]:checked');
+
+    return {
+        fullName: form.fullName.value.trim(),
+        emailAddress: form.emailAddress.value.trim(),
+        phoneNumber: form.phoneNumber.value.trim(),
+        houseNumber: form.houseNumber.value.trim(),
+        streetAddress: form.streetAddress.value.trim(),
+        city: form.city.value.trim(),
+        stateProvince: form.stateProvince.value.trim(),
+        postalCode: form.postalCode.value.trim(),
+        country: form.country.value.trim(),
+        paymentMethod: paymentMethodInput ? paymentMethodInput.value : ''
+    };
+}
+
+function validateCheckoutData(data) {
+    const requiredFields = [
+        ['fullName', 'Full Name is required.'],
+        ['emailAddress', 'Email Address is required.'],
+        ['phoneNumber', 'Phone Number is required.'],
+        ['houseNumber', 'House/Apartment Number is required.'],
+        ['streetAddress', 'Street Address is required.'],
+        ['city', 'City is required.'],
+        ['stateProvince', 'State/Province is required.'],
+        ['postalCode', 'Postal Code is required.'],
+        ['country', 'Country is required.']
+    ];
+
+    for (const [fieldName, message] of requiredFields) {
+        if (!data[fieldName]) {
+            return { valid: false, message, focusFieldId: fieldName };
+        }
+    }
+
+    if (!isValidEmail(data.emailAddress)) {
+        return { valid: false, message: 'Please enter a valid Email Address.', focusFieldId: 'emailAddress' };
+    }
+
+    const cleanPhone = data.phoneNumber.replace(/[\s\-()+]/g, '');
+    if (!/^\d{7,15}$/.test(cleanPhone)) {
+        return { valid: false, message: 'Please enter a valid Phone Number.', focusFieldId: 'phoneNumber' };
+    }
+
+    if (!data.paymentMethod) {
+        return { valid: false, message: 'Please select a Payment Method.', focusFieldId: 'paymentOptions' };
+    }
+
+    return { valid: true };
+}
+
+function renderCheckoutSummary() {
+    const summaryItems = document.getElementById('checkoutSummaryItems');
+    const grandTotal = document.getElementById('checkoutGrandTotal');
+
+    if (!summaryItems || !grandTotal) {
+        return;
+    }
+
+    if (!cart.length) {
+        summaryItems.innerHTML = '<p class="checkout-empty">Your cart is empty.</p>';
+        grandTotal.textContent = '₹0';
+        return;
+    }
+
+    summaryItems.innerHTML = '';
+    cart.forEach(item => {
+        const lineItem = document.createElement('div');
+        lineItem.className = 'order-line-item';
+        lineItem.innerHTML = `
+            <span class="line-product">${item.name}</span>
+            <span class="line-qty">${item.quantity}</span>
+            <span class="line-price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
+        `;
+        summaryItems.appendChild(lineItem);
+    });
+
+    grandTotal.textContent = `₹${getCartTotal().toLocaleString('en-IN')}`;
+}
+
+function getCartTotal() {
+    return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+}
+
+function setCheckoutVisibility(visible) {
+    const checkoutSection = document.getElementById('checkoutSection');
+    const cartModal = document.getElementById('cartModal');
+    const cartOverlay = document.querySelector('.cart-overlay');
+    if (!checkoutSection) {
+        return;
+    }
+
+    checkoutSection.classList.toggle('active', visible);
+    document.body.classList.toggle('checkout-active', visible);
+    if (visible) {
+        document.body.classList.remove('confirmation-active');
+        const confirmationSection = document.getElementById('confirmationSection');
+        if (confirmationSection) {
+            confirmationSection.classList.remove('active');
+        }
+
+        // Hard-hide cart UI so checkout is always visible.
+        if (cartModal) {
+            cartModal.classList.remove('active');
+            cartModal.style.display = 'none';
+        }
+        if (cartOverlay) {
+            cartOverlay.classList.remove('active');
+            cartOverlay.style.display = 'none';
+        }
+        document.body.style.overflow = 'auto';
+    } else {
+        if (cartModal) {
+            cartModal.style.display = '';
+        }
+        if (cartOverlay) {
+            cartOverlay.style.display = '';
+        }
+    }
+}
+
+function setConfirmationVisibility(visible) {
+    const confirmationSection = document.getElementById('confirmationSection');
+    if (!confirmationSection) {
+        return;
+    }
+
+    confirmationSection.classList.toggle('active', visible);
+    document.body.classList.toggle('confirmation-active', visible);
+    if (visible) {
+        document.body.classList.remove('checkout-active');
+        const checkoutSection = document.getElementById('checkoutSection');
+        if (checkoutSection) {
+            checkoutSection.classList.remove('active');
+        }
+    }
+}
+
+function persistOrder(order) {
+    const allOrders = JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY) || '[]');
+    allOrders.push(order);
+    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(allOrders));
+}
+
+function showConfirmation(order) {
+    const orderNumber = document.getElementById('confirmOrderNumber');
+    const customerName = document.getElementById('confirmCustomerName');
+    const orderTotal = document.getElementById('confirmOrderTotal');
+    const message = document.getElementById('confirmationMessage');
+
+    if (orderNumber) {
+        orderNumber.textContent = order.orderNumber;
+    }
+    if (customerName) {
+        customerName.textContent = order.customer.fullName;
+    }
+    if (orderTotal) {
+        orderTotal.textContent = `₹${order.total.toLocaleString('en-IN')}`;
+    }
+    if (message) {
+        message.textContent = 'Thank you for shopping with uenaturals. We have received your order and will contact you shortly.';
+    }
+}
+
+function restoreSavedCustomerDetails() {
+    const checkoutForm = document.getElementById('checkoutForm');
+    const saved = JSON.parse(localStorage.getItem(CUSTOMER_STORAGE_KEY) || 'null');
+
+    if (!checkoutForm || !saved) {
+        return;
+    }
+
+    checkoutForm.fullName.value = saved.fullName || '';
+    checkoutForm.emailAddress.value = saved.emailAddress || '';
+    checkoutForm.phoneNumber.value = saved.phoneNumber || '';
+    checkoutForm.houseNumber.value = saved.houseNumber || '';
+    checkoutForm.streetAddress.value = saved.streetAddress || '';
+    checkoutForm.city.value = saved.city || '';
+    checkoutForm.stateProvince.value = saved.stateProvince || '';
+    checkoutForm.postalCode.value = saved.postalCode || '';
+    checkoutForm.country.value = saved.country || '';
+
+    if (saved.paymentMethod) {
+        const paymentRadio = checkoutForm.querySelector(`input[name="paymentMethod"][value="${saved.paymentMethod}"]`);
+        if (paymentRadio) {
+            paymentRadio.checked = true;
+        }
+    }
+}
 
 // ============================================
 // FAQ ACCORDION
