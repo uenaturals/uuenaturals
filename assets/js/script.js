@@ -190,7 +190,11 @@ function initCheckout() {
     const continueShoppingBtn = document.getElementById('continueShoppingBtn');
 
     if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', openCheckout);
+        checkoutBtn.addEventListener('click', function(event) {
+            // Always route to dedicated checkout page for reliable behavior.
+            event.preventDefault();
+            window.location.href = 'checkout.html';
+        });
     }
 
     // Fallback delegation ensures checkout still opens if the button is re-rendered.
